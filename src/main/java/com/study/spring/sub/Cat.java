@@ -1,6 +1,6 @@
 package com.study.spring.sub;
 
-import com.study.spring.AutoWired;
+import com.study.spring.Autowired;
 import com.study.spring.Component;
 import com.study.spring.PostConstruct;
 
@@ -10,7 +10,7 @@ public class Cat {
 
     public int age;
 
-    @AutoWired
+    @Autowired
     private Dog dog;
 
     @PostConstruct
