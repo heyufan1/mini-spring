@@ -18,6 +18,9 @@ import java.util.Map;
 public class ApplicationContext {
 
     private Map<String, Object> ioc = new HashMap<>();
+
+    private Map<String, Object> loadingIoc = new HashMap<>();
+
     private Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
 
     public ApplicationContext(String packageName) throws Exception {
@@ -37,9 +40,12 @@ public class ApplicationContext {
         String name = beanDefinition.getName();
         if (ioc.containsKey(name)) {
             return ioc.get(name);
-        } else {
-            return doCreateBean(beanDefinition);
         }
+        if (loadingIoc.containsKey(name)) {
+            return loadingIoc.get(name);
+        }
+        return doCreateBean(beanDefinition);
+
     }
 
     private Object doCreateBean(BeanDefinition beanDefinition) {
@@ -47,15 +53,16 @@ public class ApplicationContext {
         Object bean = null;
         try {
             bean = constructor.newInstance();
+            loadingIoc.put(beanDefinition.getName(), bean);
             autowiredBean(bean, beanDefinition);
             Method postConstructMethod = beanDefinition.getPostConstructMethod();
             if (postConstructMethod != null) {
                 postConstructMethod.invoke(bean);
             }
+            ioc.put(beanDefinition.getName(), loadingIoc.remove(beanDefinition.getName()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        ioc.put(beanDefinition.getName(), bean);
         return bean;
     }
 
